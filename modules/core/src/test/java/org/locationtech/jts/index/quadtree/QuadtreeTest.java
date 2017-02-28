@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2016 Vivid Solutions.
+ * Copyright (c) 2016 Martin Davis.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,27 +9,26 @@
  *
  * http://www.eclipse.org/org/documents/edl-v10.php.
  */
-package org.locationtech.jts.index;
 
-import org.locationtech.jts.index.quadtree.Quadtree;
+package org.locationtech.jts.index.quadtree;
+
+import java.util.List;
 
 import junit.framework.TestCase;
+import junit.textui.TestRunner;
+
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.SpatialIndexTester;
+
 import test.jts.util.SerializationUtil;
 
-
-
-/**
- * @version 1.7
- */
 public class QuadtreeTest extends TestCase {
-
-  public QuadtreeTest(String Name_) {
-    super(Name_);
+  public static void main(String args[]) {
+    TestRunner.run(QuadtreeTest.class);
   }
 
-  public static void main(String[] args) {
-    String[] testCaseName = {QuadtreeTest.class.getName()};
-    junit.textui.TestRunner.main(testCaseName);
+  public QuadtreeTest(String name) {
+    super(name);
   }
 
   public void testSpatialIndex()
@@ -56,5 +54,17 @@ public class QuadtreeTest extends TestCase {
     tester.run();
     assertTrue(tester.isSuccess());
   }
+
+  @SuppressWarnings("rawtypes")
+	public void testNullQuery() {
+  	Quadtree qt = new Quadtree();
+  	List result1 = qt.query(null); 
+  	assertTrue(result1.size() == 0);
+  	
+  	qt.insert(new Envelope(0, 10, 0, 10), "some data");
+  	List result2 = qt.query(null); 
+  	assertTrue(result2.size() == 0);
+  }
+
 
 }
