@@ -1,3 +1,15 @@
+/*
+ * Copyright (c) 2017 LocationTech (www.locationtech.org).
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v. 1.0 which accompanies this distribution.
+ * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at
+ *
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ */
+
 package org.locationtech.jtslab.clean;
 
 import junit.framework.TestCase;
@@ -9,16 +21,16 @@ import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.operation.overlay.snap.GeometrySnapper;
 import org.locationtech.jts.util.Stopwatch;
 
-public class SliverRemoverTest extends TestCase{
+public class SpikeRemoverTest extends TestCase{
 
   private WKTReader reader = new WKTReader();
 
-  public SliverRemoverTest(String name) {
+  public SpikeRemoverTest(String name) {
     super(name);
   }
 
   public static void main(String[] args) {
-    junit.textui.TestRunner.run(SliverRemoverTest.class);
+    junit.textui.TestRunner.run(SpikeRemoverTest.class);
   }
   
   public void testPolygon1() throws ParseException {
@@ -45,13 +57,25 @@ public class SliverRemoverTest extends TestCase{
     doTest(polyIn, 1E-7, polyOut);
   }
   
+  public void testLineString1() throws ParseException {
+    
+    Geometry lineIn = reader.read("LINESTRING(10 10, 30 10, 25 10.000000001, 27 9.99999999, 40 10))");
+    Geometry lineOut = reader.read("LINESTRING(10 10, 27 9.99999999, 40 10)");
+    
+    doTest(lineIn, 1E-7, lineOut);
+  }
   
   private void doTest(Geometry input, double noSliverThreshold, Geometry expectedOutput)
   {
-    SliverRemover sr = new SliverRemover(noSliverThreshold);
+    SpikeRemover sr = new SpikeRemover(noSliverThreshold);
     Geometry output = sr.clean(input);
     
-    assertTrue(output.equalsExact(expectedOutput));
+    boolean ee = output.equalsExact(expectedOutput);
+    if (!ee) {
+      System.out.println("expected: " + expectedOutput.toString());
+      System.out.println("result  : " + output.toString());
+    }
+    assertTrue(ee);
   }
   
   public void testRealWorld1() throws ParseException {
@@ -80,20 +104,22 @@ public class SliverRemoverTest extends TestCase{
     
     Stopwatch sw = new Stopwatch();
     sw.start();
-    Geometry diffNoSliver = new SliverRemover().clean(diff);
+    Geometry diffNoSpike = new SpikeRemover().clean(diff);
     long time = sw.stop();
-    System.out.println("SliverRemover: " + sw.getTimeString(time));
+    System.out.println("SpikeRemover: " + sw.getTimeString(time));
+
+    assertNotNull(diffNoSpike);
+    assertEquals(diff.getArea(), diffNoSpike.getArea(), 1.0e-7);
+    
     sw.reset();
     sw.start();
-    Geometry diffNoSliverSnap = GeometrySnapper.snapToSelf(diff, 1e-10, true);
+    Geometry diffNoSpikeSnap = GeometrySnapper.snapToSelf(diff, 1e-10, true);
     time = sw.stop();
-    System.out.println("SnapToSelf: " + sw.getTimeString(time));
+    System.out.println("Snap to self: " + sw.getTimeString(time));
     
-    assertNotNull(diffNoSliver);
-    assertEquals(diff.getArea(), diffNoSliver.getArea(), 1.0e-7);
 
     HausdorffSimilarityMeasure hsm = new HausdorffSimilarityMeasure();
-    System.out.println("HausdorffSimilarityMeasure :" + hsm.measure(diffNoSliver, diffNoSliverSnap));
+    System.out.println("HausdorffSimilarityMeasure :" + hsm.measure(diffNoSpike, diffNoSpikeSnap));
 
     
     Geometry expected = reader.read("POLYGON ((194821.83326186723 587034.5716467471, 194760.91615204382 587122.9405147346, " + 
@@ -107,7 +133,7 @@ public class SliverRemoverTest extends TestCase{
         "194886.66904433916 586975.6575260739, 194848.42375338063 587031.2367719872, " +
         "194838.29986314307 587045.9229040528, 194821.83326186723 587034.5716467471))");
     
-    assertTrue(expected.equalsExact(diffNoSliver));
+    assertTrue(expected.equalsExact(diffNoSpike));
   }
   
 }

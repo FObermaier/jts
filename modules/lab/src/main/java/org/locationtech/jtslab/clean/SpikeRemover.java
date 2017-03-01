@@ -1,3 +1,15 @@
+/*
+ * Copyright (c) 2017 LocationTech (www.locationtech.org).
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * and Eclipse Distribution License v. 1.0 which accompanies this distribution.
+ * The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ * and the Eclipse Distribution License is available at
+ *
+ * http://www.eclipse.org/org/documents/edl-v10.php.
+ */
+
 package org.locationtech.jtslab.clean;
 
 import java.util.ArrayList;
@@ -6,7 +18,7 @@ import java.util.Iterator;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.CoordinateSequenceFactory;
-import org.locationtech.jts.geom.CoordinateSequenceFilter;
+//import org.locationtech.jts.geom.CoordinateSequenceFilter;
 import org.locationtech.jts.geom.CoordinateSequences;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -22,9 +34,9 @@ import org.locationtech.jts.util.Assert;
  * @author FObermaier
  * @since 1.15
  */
-public class SliverRemover {
+public class SpikeRemover {
 
-  private static final double NOSLIVERTHRESHOLD = 1e-10;
+  private static final double NOSPIKETHRESHOLD = 1e-10;
   
 //  private class SilverTesterFilter implements CoordinateSequenceFilter {
 //
@@ -36,7 +48,7 @@ public class SliverRemover {
 //    /**
 //     * Creates an instance of this class
 //     * @param seq The initial sequence
-//     * @param noSliverThreshold a value indicating if a set of 3 coordinates form a sliver.
+//     * @param noSliverThreshold a value indicating if a set of 3 coordinates form a spike.
 //     */
 //    public SilverTesterFilter(CoordinateSequence seq, double noSliverThreshold) {
 //
@@ -83,35 +95,35 @@ public class SliverRemover {
   
   
   /**
-   * A {@link SliverTester} iterator over a coordinate sequence
+   * A {@link SpikeTester} iterator over a coordinate sequence
    */
-  private class SliverTesterIterator implements Iterator {
+  private class SpikeIndexIterator implements Iterator {
 
     CoordinateSequence _seq;
     boolean _isRing;
     double _noSliverThreshold;
-    boolean _sliverPossible;
+    boolean _spikePossible;
     //int _currentIndex;
     
-    SliverTester _tester;
+    SpikeTester _tester;
     
     /**
      * Creates an instance of this class
      * 
      * @param seq The sequence to iterate over
-     * @param noSliverThreshold The threshold to indicate a coordinate set does not form a sliver.
+     * @param noSliverThreshold The threshold to indicate a coordinate set does not form a spike.
      * 
      * @throws IllegalArgumentException Thrown if either {@code seq} is null or {@code noSliverThreshold} 
      * is &le; {@code 0.0}.
      * 
      */
-    public SliverTesterIterator(CoordinateSequence seq, double noSliverThreshold)
+    public SpikeIndexIterator(CoordinateSequence seq, double noSliverThreshold)
         throws IllegalArgumentException
     {
-      this(new DefaultSliverTestEvaluator(), seq, noSliverThreshold);
+      this(new DefaultSpikeTestEvaluator(), seq, noSliverThreshold);
     }
     
-    public SliverTesterIterator(SliverTestEvaluator stEval, CoordinateSequence seq, double noSliverThreshold)
+    public SpikeIndexIterator(SpikeTestEvaluator stEval, CoordinateSequence seq, double noSliverThreshold)
         throws IllegalArgumentException
     {
       if (seq == null)
@@ -123,7 +135,7 @@ public class SliverRemover {
       _isRing = CoordinateSequences.isRing(seq);
       _noSliverThreshold = noSliverThreshold;
       
-      _sliverPossible = seq.size() > (_isRing ? 3 : 2);
+      _spikePossible = seq.size() > (_isRing ? 3 : 2);
       _tester = findFirst(stEval);
     }
     
@@ -145,19 +157,19 @@ public class SliverRemover {
       return res;
     }
     
-    private SliverTester findFirst(SliverTestEvaluator stEval) {
+    private SpikeTester findFirst(SpikeTestEvaluator stEval) {
     
-       if (!_sliverPossible)
+       if (!_spikePossible)
          return null;
        
        _tester = _isRing 
-           ? new SliverTester(stEval, 0, _seq.getCoordinate(_seq.size()-2),_seq.getCoordinate(0), _seq.getCoordinate(1), _noSliverThreshold)
-           : new SliverTester(stEval, 1, _seq.getCoordinate(0),_seq.getCoordinate(1), _seq.getCoordinate(2), _noSliverThreshold);
+           ? new SpikeTester(stEval, 0, _seq.getCoordinate(_seq.size()-2),_seq.getCoordinate(0), _seq.getCoordinate(1), _noSliverThreshold)
+           : new SpikeTester(stEval, 1, _seq.getCoordinate(0),_seq.getCoordinate(1), _seq.getCoordinate(2), _noSliverThreshold);
 
        return _tester.getIsSliver() ? _tester : findNext();
     }
     
-    private SliverTester findNext() {
+    private SpikeTester findNext() {
 
       if (_tester == null)
         return null;
@@ -165,7 +177,7 @@ public class SliverRemover {
       if (_tester.getIndex() < _seq.size()-2) {
         _tester.update(_seq.getCoordinate(_tester.getIndex() + 2)); //;= new SliverTester(_tester, _seq.getCoordinate(_tester.getIndex() + 2));
         if (_tester.getIsSliver())
-          return (SliverTester)_tester;
+          return (SpikeTester)_tester;
         return findNext();
       }
 
@@ -176,11 +188,11 @@ public class SliverRemover {
   
   
   /**
-   * Class to test if a set of three {@link Coordinate}s form a sliver.
+   * Class to test if a set of three {@link Coordinate}s form a spike.
    * 
    * Given the three coordinates p0, p1, p2, the tester computes the 
    * distances between all three coordinates. These coordinates form a 
-   * sliver if the distance |p0-p1| is (nearly) the same as the distance 
+   * spike if the distance |p0-p1| is (nearly) the same as the distance 
    * of (|p1-p2| + |p0-p2|). 
    * 
    * The actual test checks if the difference between those distances
@@ -189,7 +201,7 @@ public class SliverRemover {
    * @author FObermaier
    * @since 1.15
    */
-  private class SliverTester
+  private class SpikeTester
   {
     int _index;
     Coordinate _previous;
@@ -199,7 +211,7 @@ public class SliverRemover {
     boolean _isSliver;
     double _noSliverThreshold;
     
-    SliverTestEvaluator _stEval;
+    SpikeTestEvaluator _stEval;
     
     /**
      * Creates an instance of this class
@@ -208,24 +220,24 @@ public class SliverRemover {
      * @param prev The previous point
      * @param curr The current point
      * @param next the next point
-     * @param noSliverThreshold The threshold that indicates a no-sliver situation.
+     * @param noSliverThreshold The threshold that indicates a no-spike situation.
      */
-    public SliverTester(int index, Coordinate prev, Coordinate curr, Coordinate next, double noSliverThreshold) {
-      this(new DefaultSliverTestEvaluator(), index, prev, curr, next, noSliverThreshold);
+    public SpikeTester(int index, Coordinate prev, Coordinate curr, Coordinate next, double noSliverThreshold) {
+      this(new DefaultSpikeTestEvaluator(), index, prev, curr, next, noSliverThreshold);
     }
       /**
        * Creates an instance of this class
        * 
-       * @param stEval The sliver test evaluator to use.
+       * @param stEval The spike test evaluator to use.
        * @param index The index in the sequence
        * @param prev The previous point
        * @param curr The current point
        * @param next the next point
-       * @param noSliverThreshold The threshold that indicates a no-sliver situation.
+       * @param noSpikeThreshold The threshold that indicates a no-spike situation.
        * @exception {@link IllegalArgumentException} thrown if {@code slEval} is {@code null}.
        */
     
-    public SliverTester(SliverTestEvaluator stEval, int index, Coordinate prev, Coordinate curr, Coordinate next, double noSliverThreshold)
+    public SpikeTester(SpikeTestEvaluator stEval, int index, Coordinate prev, Coordinate curr, Coordinate next, double noSpikeThreshold)
         throws IllegalArgumentException
     {
 
@@ -236,8 +248,8 @@ public class SliverRemover {
       _previous = prev;
       _current = curr;
       _next = next;
-      _noSliverThreshold = noSliverThreshold;
-      _isSliver = stEval.computeIsSliver(prev, curr, next, noSliverThreshold);
+      _noSpikeThreshold = noSpikeThreshold;
+      _isSliver = stEval.computeIsSpike(prev, curr, next, noSpikeThreshold);
     }
 
     public int getIndex() {
@@ -247,9 +259,9 @@ public class SliverRemover {
 //    /**
 //     * Creates an instance of this class
 //     * 
-//     * @param prev The previous sliver tester
+//     * @param prev The previous spike tester
 //     * @param next the next point
-//     * @param noSliverThreshold The threshold that indicates a no-sliver situation.
+//     * @param noSpikeThreshold The threshold that indicates a no-spike situation.
 //     * @exception {@link IllegalArgumentException} thrown if {@code prev} is {@code null}.
 //     */
 //    public SliverTester(SliverTester prev, Coordinate next) 
@@ -261,25 +273,25 @@ public class SliverRemover {
 //      _index = prev._index + 1;
 //      _previous = prev.getIsSliver() ? prev._previous : prev._current;
 //      _current = prev._next;
-//      _noSliverThreshold = prev._noSliverThreshold;
+//      _noSpikeThreshold = prev._noSpikeThreshold;
 //      
 //      _next = next;
-//      _isSliver = _stEval.computeIsSliver(_previous, _current, _next, _noSliverThreshold);
+//      _isSliver = _stEval.computeIsSliver(_previous, _current, _next, _noSpikeThreshold);
 //    }
 
     public void update(Coordinate next) {
       boolean isSliver = _isSliver;
       _index = _index + 1;
-      if (!isSliver) _previous = _current;
+      /*if (!isSliver)*/ _previous = _current;
       _current = _next;
       _next = next;
-      _isSliver = _stEval.computeIsSliver(_previous, _current, _next, _noSliverThreshold);
+      _isSliver = _stEval.computeIsSpike(_previous, _current, _next, _noSpikeThreshold);
     }
     
     /**
-     * Gets a value indicating if the current set of coordinates form a sliver
+     * Gets a value indicating if the current set of coordinates form a spike
      * 
-     * @return {@code true} if the coordinates form a sliver.
+     * @return {@code true} if the coordinates form a spike.
      */
     public boolean getIsSliver() {
     
@@ -287,52 +299,52 @@ public class SliverRemover {
     }
     
 //    /**
-//     * Function to compute if the current set of coordinates form a sliver
-//     * @return {@code true} if the coordinates form a sliver.
+//     * Function to compute if the current set of coordinates form a spike
+//     * @return {@code true} if the coordinates form a spike.
 //     */
 //    private boolean computeIsSliver() {
 //      double distpc = _previous.distance(_current);
 //      double distcn = _current.distance(_next);
 //      double distpn = _previous.distance(_next);
 //      
-//      return (distcn + distpn) - distpc  < _noSliverThreshold; 
+//      return (distcn + distpn) - distpc  < _noSpikeThreshold; 
 //    }
   }
 
-  private static class DefaultSliverTestEvaluator implements SliverTestEvaluator {
+  private static class DefaultSpikeTestEvaluator implements SpikeTestEvaluator {
 
-    public boolean computeIsSliver(Coordinate p0, Coordinate p1, Coordinate p2, double noSliverThreshold) {
+    public boolean computeIsSpike(Coordinate p0, Coordinate p1, Coordinate p2, double noSpikeThreshold) {
 
       double distpc = p0.distance(p1);
       double distcn = p1.distance(p2);
       double distpn = p0.distance(p2);
       
-      return (distcn + distpn) - distpc  < noSliverThreshold;     }
+      return (distcn + distpn) - distpc  < noSpikeThreshold;     }
   }
   
-  private double _noSliverThreshold;
+  private double _noSpikeThreshold;
   
   /**
    * Creates an instance of this class
    */
-  public SliverRemover() {
-    this(NOSLIVERTHRESHOLD);
+  public SpikeRemover() {
+    this(NOSPIKETHRESHOLD);
   }
 
   /**
    * Creates an instance of this class
 
-   * @param noSliverThreshold The threshold that indicates if a set of three coordinates form a sliver or not.
+   * @param noSpikeThreshold The threshold that indicates if a set of three coordinates form a spike or not.
    */
-  public SliverRemover(double noSliverThreshold) {
-    _noSliverThreshold = noSliverThreshold;
+  public SpikeRemover(double noSpikeThreshold) {
+    _noSpikeThreshold = noSpikeThreshold;
   }
   
   /**
-   * Function to remove any sliver artifacts from an input {@link Geometry}.
+   * Function to remove any spike artifacts from an input {@link Geometry}.
    * 
    * @param geom The input geometry.
-   * @return The input geometry without any sliver artifacts.
+   * @return The input geometry without any spike artifacts.
    * @throws IllegalArgumentException Thrown if {@link geom} is {@code null}
    */
   public Geometry clean(Geometry geom) 
@@ -375,15 +387,15 @@ public class SliverRemover {
     CoordinateSequence seq = ls.getCoordinateSequence();
     ArrayList spikeIndices = new ArrayList();
     
-    // iterate over all possible slivers
-    SliverTesterIterator it = new SliverTesterIterator(seq, _noSliverThreshold);
+    // iterate over all possible spikes
+    SpikeIndexIterator it = new SpikeIndexIterator(seq, _noSpikeThreshold);
     while (it.hasNext())
     {
       Integer spikeIndex = (Integer)it.next();
       spikeIndices.add(spikeIndex);
     }
     
-    // No slivers, return original geometry 
+    // No spikes, return original geometry 
     if (spikeIndices.size() == 0)
       return ls;
     
