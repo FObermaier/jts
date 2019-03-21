@@ -556,4 +556,27 @@ public class Triangle
     return interpolateZ(p, this.p0, this.p1, this.p2);
   }
 
-}
+  /**
+   * Predicate function to test if a {@linkplain Coordinate} is inside this {@linkplain Triangle}.
+
+   * @param pt the coordinate to test
+   * @return a value indicating if <c>pt</c> is inside this triangle.
+   */
+  public boolean contains (Coordinate pt)
+  {
+    boolean hasNegative, hasPositive;
+
+    double d1 = sign(pt, p0, p1);
+    double d2 = sign(pt, p1, p2);
+    double d3 = sign(pt, p2, p0);
+
+    hasNegative = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    hasPositive = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(hasNegative && hasPositive);
+  }
+
+  private static double sign (Coordinate p1, Coordinate p2, Coordinate p3)
+  {
+    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+  }}
