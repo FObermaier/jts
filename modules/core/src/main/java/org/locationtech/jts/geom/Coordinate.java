@@ -21,43 +21,43 @@ import org.locationtech.jts.util.NumberUtil;
 /**
  * A lightweight class used to store coordinates on the 2-dimensional Cartesian plane.
  * <p>
- * It is distinct from {@link Point}, which is a subclass of {@link Geometry}. 
+ * It is distinct from {@link Point}, which is a subclass of {@link Geometry}.
  * Unlike objects of type {@link Point} (which contain additional
  * information such as an envelope, a precision model, and spatial reference
  * system information), a <code>Coordinate</code> only contains ordinate values
  * and accessor methods. </p>
  * <p>
- * <code>Coordinate</code>s are two-dimensional points, with an additional Z-ordinate. 
- * If an Z-ordinate value is not specified or not defined, 
+ * <code>Coordinate</code>s are two-dimensional points, with an additional Z-ordinate.
+ * If an Z-ordinate value is not specified or not defined,
  * constructed coordinates have a Z-ordinate of <code>NaN</code>
- * (which is also the value of <code>NULL_ORDINATE</code>).  
+ * (which is also the value of <code>NULL_ORDINATE</code>).
  * The standard comparison functions ignore the Z-ordinate.
  * Apart from the basic accessor functions, JTS supports
- * only specific operations involving the Z-ordinate.</p> 
+ * only specific operations involving the Z-ordinate.</p>
  * <p>
  * Implementations may optionally support Z-ordinate and M-measure values
- * as appropriate for a {@link CoordinateSequence}. 
+ * as appropriate for a {@link CoordinateSequence}.
  * Use of {@link #getZ()} and {@link #getM()}
- * accessors, or {@link #getOrdinate(int)} are recommended.</p> 
+ * accessors, or {@link #getOrdinate(int)} are recommended.</p>
  *
  * @version 1.16
  */
 public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializable {
   private static final long serialVersionUID = 6683108902428366910L;
-  
+
   /**
    * The value used to indicate a null or missing ordinate value.
-   * In particular, used for the value of ordinates for dimensions 
+   * In particular, used for the value of ordinates for dimensions
    * greater than the defined dimension of a coordinate.
    */
   public static final double NULL_ORDINATE = Double.NaN;
-  
+
   /** Standard ordinate index value for, where X is 0 */
   public static final int X = 0;
 
   /** Standard ordinate index value for, where Y is 1 */
   public static final int Y = 1;
-  
+
   /**
    * Standard ordinate index value for, where Z is 2.
    *
@@ -73,17 +73,21 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
    * using {@link #getDimension()} and {@link #getMeasures()} before use.
    */
   public static final int M = 3;
-  
+
   /**
    * The x-ordinate.
+   * <p>
+   * Avoid setting this field externally as it might have unexpected consequences!
    */
   public double x;
-  
+
   /**
    * The y-ordinate.
+   * <p>
+   * Avoid setting this field externally as it might have unexpected consequences!
    */
   public double y;
-  
+
   /**
    * The z-ordinate.
    * <p>
@@ -144,84 +148,84 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
 
   /**
    *  Retrieves the value of the X ordinate.
-   *  
+   *
    *  @return the value of the X ordinate
-   */  
+   */
   public double getX() {
     return x;
   }
 
   /**
    * Sets the X ordinate value.
-   * 
+   *
    * @param x the value to set as X
    */
   public void setX(double x) {
     this.x = x;
   }
-  
+
   /**
    *  Retrieves the value of the Y ordinate.
-   *  
+   *
    *  @return the value of the Y ordinate
-   */  
+   */
   public double getY() {
-      return y;      
+      return y;
   }
 
   /**
    * Sets the Y ordinate value.
-   * 
+   *
    * @param y the value to set as Y
    */
   public void setY(double y) {
     this.y = y;
   }
-  
+
   /**
    *  Retrieves the value of the Z ordinate, if present.
    *  If no Z value is present returns <tt>NaN</tt>.
-   *  
+   *
    *  @return the value of the Z ordinate, or <tt>NaN</tt>
-   */   
+   */
   public double getZ() {
-      return z;      
+      return z;
   }
-  
+
   /**
    * Sets the Z ordinate value.
-   * 
+   *
    * @param z the value to set as Z
    */
   public void setZ(double z) {
     this.z = z;
   }
-  
+
   /**
    *  Retrieves the value of the measure, if present.
    *  If no measure value is present returns <tt>NaN</tt>.
-   *  
+   *
    *  @return the value of the measure, or <tt>NaN</tt>
-   */    
+   */
   public double getM() {
-    return Double.NaN;     
+    return Double.NaN;
   }
-  
+
   /**
    * Sets the measure value, if supported.
-   * 
+   *
    * @param m the value to set as M
    */
   public void setM(double m) {
     throw new IllegalArgumentException("Invalid ordinate index: " + M);
   }
-  
+
   /**
    * Gets the ordinate value for the given index.
-   * 
-   * The base implementation supports values for the index are 
-   * {@link X}, {@link Y}, and {@link Z}.
-   * 
+   *
+   * The base implementation supports values for the index are
+   * {@link #X}, {@link #Y}, and {@link #Z}.
+   *
    * @param ordinateIndex the ordinate index
    * @return the value of the ordinate
    * @throws IllegalArgumentException if the index is not valid
@@ -235,14 +239,14 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
     }
     throw new IllegalArgumentException("Invalid ordinate index: " + ordinateIndex);
   }
-  
+
   /**
    * Sets the ordinate for the given index
    * to a given value.
-   * 
-   * The base implementation supported values for the index are 
-   * {@link X}, {@link Y}, and {@link Z}.
-   * 
+   *
+   * The base implementation supported values for the index are
+   * {@link #X}, {@link #Y}, and {@link #Z}.
+   *
    * @param ordinateIndex the ordinate index
    * @param value the value to set
    * @throws IllegalArgumentException if the index is not valid
@@ -301,7 +305,7 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
     }
     return true;
   }
-  
+
   /**
    * Tests if another coordinate has the same values for the X, Y and Z ordinates.
    *
@@ -314,10 +318,10 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
                ((getZ() == other.getZ()) ||
                (Double.isNaN(getZ()) && Double.isNaN(other.getZ())));
   }
-  
+
   /**
    * Tests if another coordinate has the same value for Z, within a tolerance.
-   * 
+   *
    * @param c a coordinate
    * @param tolerance the tolerance value
    * @return true if the Z ordinates are within the given tolerance
@@ -325,7 +329,7 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
   public boolean equalInZ(Coordinate c, double tolerance){
     return NumberUtil.equalsWithTolerance(this.getZ(), c.getZ(), tolerance);
   }
-  
+
   /**
    *  Returns <code>true</code> if <code>other</code> has the same values for
    *  the x and y ordinates.
@@ -391,10 +395,10 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
       return null;
     }
   }
-  
+
   /**
    * Creates a copy of this Coordinate.
-   * 
+   *
    * @return a copy of this coordinate.
    */
   public Coordinate copy() {
@@ -404,7 +408,7 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
   /**
    * Computes the 2-dimensional Euclidean distance to another location.
    * The Z-ordinate is ignored.
-   * 
+   *
    * @param c a point
    * @return the 2-dimensional Euclidean distance between the locations
    */
@@ -416,7 +420,7 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
 
   /**
    * Computes the 3-dimensional Euclidean distance to another location.
-   * 
+   *
    * @param c a coordinate
    * @return the 3-dimensional Euclidean distance between the locations
    */
@@ -429,7 +433,7 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
 
   /**
    * Gets a hashcode for this coordinate.
-   * 
+   *
    * @return a hashcode for this coordinate
    */
   public int hashCode() {
@@ -443,7 +447,7 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
   /**
    * Computes a hash code for a double value, using the algorithm from
    * Joshua Bloch's book <i>Effective Java"</i>
-   * 
+   *
    * @param x the value to compute for
    * @return a hashcode for x
    */
@@ -509,8 +513,8 @@ public class Coordinate implements Comparable<Coordinate>, Cloneable, Serializab
      * Compares two {@link Coordinate}s along to the number of
      * dimensions specified.
      *
-     * @param o1 a {@link Coordinate}
-     * @param o2 a {link Coordinate}
+     * @param c1 a {@link Coordinate}
+     * @param c2 a {@link Coordinate}
      * @return -1, 0, or 1 depending on whether o1 is less than,
      * equal to, or greater than 02
      *
