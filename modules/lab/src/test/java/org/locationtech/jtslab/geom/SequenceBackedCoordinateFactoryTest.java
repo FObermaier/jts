@@ -1,27 +1,28 @@
 package org.locationtech.jtslab.geom;
 
 import junit.framework.TestCase;
+import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 
-public class SequenceBackedCoordinateFactoryTest extends TestCase {
+public class SequenceBackedCoordinateFactoryTest {
 
   @Test
   public void testDontSetCoordinateFactory() {
     Coordinates.setCoordinateFactory(null);
 
     Coordinate c = Coordinates.create(2);
-    assertTrue(c instanceof CoordinateXY);
+    Assert.assertTrue(c instanceof CoordinateXY);
 
     c = Coordinates.create(3);
-    assertTrue(c instanceof Coordinate);
+    Assert.assertEquals(c.getClass().getTypeName(), "org.locationtech.jts.geom.Coordinate");
 
     c = Coordinates.create(3, 1);
-    assertTrue(c instanceof CoordinateXYM);
+    Assert.assertTrue(c instanceof CoordinateXYM);
 
     c = Coordinates.create(4, 1);
-    assertTrue(c instanceof CoordinateXYZM);
+    Assert.assertTrue(c instanceof CoordinateXYZM);
   }
 
   @Test
@@ -30,33 +31,35 @@ public class SequenceBackedCoordinateFactoryTest extends TestCase {
       new SequenceBackedCoordinateFactory(PackedCoordinateSequenceFactory.DOUBLE_FACTORY));
 
     Coordinate c = Coordinates.create(2);
-    assertTrue(c instanceof SequenceBackedCoordinate);
+    Assert.assertTrue(c instanceof SequenceBackedCoordinate);
     SequenceBackedCoordinate sbc = (SequenceBackedCoordinate)c;
-    assertEquals(2, sbc.getDimension());
-    assertEquals(0, sbc.getMeasures());
+    Assert.assertEquals(2, sbc.getDimension());
+    Assert.assertEquals(0, sbc.getMeasures());
 
     c = Coordinates.create(3);
-    assertTrue(c instanceof SequenceBackedCoordinate);
+    Assert.assertTrue(c instanceof SequenceBackedCoordinate);
     sbc = (SequenceBackedCoordinate)c;
-    assertEquals(3, sbc.getDimension());
-    assertEquals(0, sbc.getMeasures());
+    Assert.assertEquals(3, sbc.getDimension());
+    Assert.assertEquals(0, sbc.getMeasures());
 
     c = Coordinates.create(3, 1);
-    assertTrue(c instanceof SequenceBackedCoordinate);
+    Assert.assertTrue(c instanceof SequenceBackedCoordinate);
     sbc = (SequenceBackedCoordinate)c;
-    assertEquals(3, sbc.getDimension());
-    assertEquals(1, sbc.getMeasures());
+    Assert.assertEquals(3, sbc.getDimension());
+    Assert.assertEquals(1, sbc.getMeasures());
 
     c = Coordinates.create(4, 1);
-    assertTrue(c instanceof SequenceBackedCoordinate);
+    Assert.assertTrue(c instanceof SequenceBackedCoordinate);
     sbc = (SequenceBackedCoordinate)c;
-    assertEquals(4, sbc.getDimension());
-    assertEquals(1, sbc.getMeasures());
+    Assert.assertEquals(4, sbc.getDimension());
+    Assert.assertEquals(1, sbc.getMeasures());
 
     c = Coordinates.create(12, 4);
-    assertTrue(c instanceof SequenceBackedCoordinate);
+    Assert.assertTrue(c instanceof SequenceBackedCoordinate);
     sbc = (SequenceBackedCoordinate)c;
-    assertEquals(12, sbc.getDimension());
-    assertEquals(4, sbc.getMeasures());
+    Assert.assertEquals(12, sbc.getDimension());
+    Assert.assertEquals(4, sbc.getMeasures());
+
+    Coordinates.setCoordinateFactory(null);
   }
 }
