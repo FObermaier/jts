@@ -319,7 +319,21 @@ public class Polygon
       }
       if (filter.isGeometryChanged())
         geometryChanged();
-	  }
+  }
+
+  public void apply(EntireCoordinateSequenceFilter filter)
+  {
+    shell.apply(filter);
+    if (!filter.isDone()) {
+      for (int i = 0; i < holes.length; i++) {
+        holes[i].apply(filter);
+        if (filter.isDone())
+          break;
+      }
+    }
+    if (filter.isGeometryChanged())
+      geometryChanged();
+  }
 
   public void apply(GeometryFilter filter) {
     filter.filter(this);
@@ -394,7 +408,7 @@ public class Polygon
     if (i < nHole2) return -1;
     return 0;
   }
-  
+
   protected int getTypeCode() {
     return Geometry.TYPECODE_POLYGON;
   }

@@ -196,6 +196,19 @@ public class GeometryCollection extends Geometry {
       geometryChanged();
   }
 
+  public void apply(EntireCoordinateSequenceFilter filter) {
+    if (geometries.length == 0)
+      return;
+    for (int i = 0; i < geometries.length; i++) {
+      geometries[i].apply(filter);
+      if (filter.isDone()) {
+        break;
+      }
+    }
+    if (filter.isGeometryChanged())
+      geometryChanged();
+  }
+
   public void apply(GeometryFilter filter) {
     filter.filter(this);
     for (int i = 0; i < geometries.length; i++) {
@@ -268,7 +281,7 @@ public class GeometryCollection extends Geometry {
     return 0;
 
   }
-  
+
   protected int getTypeCode() {
     return Geometry.TYPECODE_GEOMETRYCOLLECTION;
   }

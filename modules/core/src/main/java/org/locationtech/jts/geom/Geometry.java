@@ -155,7 +155,7 @@ public abstract class Geometry
     implements Cloneable, Comparable, Serializable
 {
   private static final long serialVersionUID = 8763622679187376702L;
-    
+
   protected static final int TYPECODE_POINT = 0;
   protected static final int TYPECODE_MULTIPOINT = 1;
   protected static final int TYPECODE_LINESTRING = 2;
@@ -164,7 +164,7 @@ public abstract class Geometry
   protected static final int TYPECODE_POLYGON = 5;
   protected static final int TYPECODE_MULTIPOLYGON = 6;
   protected static final int TYPECODE_GEOMETRYCOLLECTION = 7;
-  
+
   public static final String TYPENAME_POINT = "Point";
   public static final String TYPENAME_MULTIPOINT = "MultiPoint";
   public static final String TYPENAME_LINESTRING = "LineString";
@@ -173,7 +173,7 @@ public abstract class Geometry
   public static final String TYPENAME_POLYGON = "Polygon";
   public static final String TYPENAME_MULTIPOLYGON = "MultiPolygon";
   public static final String TYPENAME_GEOMETRYCOLLECTION = "GeometryCollection";
-  
+
   private final static GeometryComponentFilter geometryChangedFilter = new GeometryComponentFilter() {
     public void filter(Geometry geom) {
       geom.geometryChangedAction();
@@ -1547,6 +1547,16 @@ public abstract class Geometry
   public abstract void apply(CoordinateSequenceFilter filter);
 
   /**
+   *  Performs an operation on the coordinates in this <code>Geometry</code>'s
+   *  {@link CoordinateSequence}s.
+   *  If the filter reports that a coordinate value has been changed,
+   *  {@link #geometryChanged} will be called automatically.
+   *
+   *@param  filter  the filter to apply
+   */
+  public abstract void apply(EntireCoordinateSequenceFilter filter);
+
+  /**
    *  Performs an operation with or on this <code>Geometry</code> and its
    *  subelement <code>Geometry</code>s (if any).
    *  Only GeometryCollections and subclasses
@@ -1591,7 +1601,7 @@ public abstract class Geometry
   /**
    * Creates a deep copy of this {@link Geometry} object.
    * Coordinate sequences contained in it are copied.
-   * All instance fields are copied 
+   * All instance fields are copied
    * (i.e. <code>envelope</code>, <tt>SRID</tt> and <tt>userData</tt>).
    * <p>
    * <b>NOTE:</b> the userData object reference (if present) is copied,

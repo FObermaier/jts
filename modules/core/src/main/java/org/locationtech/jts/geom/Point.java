@@ -160,13 +160,21 @@ public class Point
 
   public void apply(CoordinateSequenceFilter filter)
   {
-	    if (isEmpty())
-        return;
-	    filter.filter(coordinates, 0);
-      if (filter.isGeometryChanged())
-        geometryChanged();
-	  }
+    if (isEmpty())
+      return;
+    filter.filter(coordinates, 0);
+    if (filter.isGeometryChanged())
+      geometryChanged();
+  }
 
+  public void apply(EntireCoordinateSequenceFilter filter)
+  {
+    if (isEmpty())
+      return;
+    filter.filter(coordinates);
+    if (filter.isGeometryChanged())
+      geometryChanged();
+  }
   public void apply(GeometryFilter filter) {
     filter.filter(this);
   }
@@ -214,7 +222,7 @@ public class Point
     Point point = (Point) other;
     return comp.compare(this.coordinates, point.coordinates);
   }
-  
+
   protected int getTypeCode() {
     return Geometry.TYPECODE_POINT;
   }

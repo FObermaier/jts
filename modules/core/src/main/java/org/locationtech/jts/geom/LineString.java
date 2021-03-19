@@ -249,6 +249,15 @@ public class LineString
       geometryChanged();
   }
 
+  public void apply(EntireCoordinateSequenceFilter filter)
+  {
+    if (points.size() == 0)
+      return;
+    filter.filter(points);
+    if (filter.isGeometryChanged())
+      geometryChanged();
+  }
+
   public void apply(GeometryFilter filter) {
     filter.filter(this);
   }
@@ -325,7 +334,7 @@ public class LineString
     LineString line = (LineString) o;
     return comp.compare(this.points, line.points);
   }
-  
+
   protected int getTypeCode() {
     return Geometry.TYPECODE_LINESTRING;
   }
